@@ -44,12 +44,6 @@ jobs:
       - name: Verify Docker login
         run: docker info
 
-      - name: Build Docker image
-        run: docker build -t yossi749/my-flask.app:latest .
-
-      - name: Push Docker image to Docker Hub
-        run: docker push yossi749/my-flask.app:latest
-
       - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
