@@ -41,15 +41,33 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Install deps
+      - name: Build Docker image
+        run: |
+          docker build -t yossi749/my-flask-app:latest .
+
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push yossi749/my-flask-app:latest
+
+      - name: Install Python deps
         run: |
           pip install -r requirements.txt
           pip install requests pymysql
 
+      - name: Wait for MySQL to be ready
+        run: |
+          until mysqladmin ping -h127.0.0.1 -p"$MYSQL_PASSWORD" --silent; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+
       - name: Run Flask (background)
         run: |
           nohup python app.py &
-          sleep 10
+          until curl -s http://127.0.0.1:5000 > /dev/null; do
+            echo "Waiting for Flask to start..."
+            sleep 2
+          done
 
-      - name: Run test
+      - name: Run tests
         run: python servertest/test.py
