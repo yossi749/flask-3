@@ -53,14 +53,6 @@ jobs:
             sleep 2
           done
 
-      - name: Run Flask (in background)
-        run: |
-          nohup python app.py > flask.log 2>&1 &
-          echo $! > flask.pid
-          until curl -s http://127.0.0.1:5000 > /dev/null; do
-            echo "Waiting for Flask to start..."
-            sleep 2
-          done
 
       - name: Run tests
         run: python servertest/test.py
