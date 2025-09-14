@@ -40,10 +40,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Verify Docker login
-        run: docker info
-
+      
       - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
@@ -58,7 +55,8 @@ jobs:
 
       - name: Run Flask (in background)
         run: |
-          nohup python app.py &
+          nohup python app.py > flask.log 2>&1 &
+          echo $! > flask.pid
           until curl -s http://127.0.0.1:5000 > /dev/null; do
             echo "Waiting for Flask to start..."
             sleep 2
@@ -66,6 +64,9 @@ jobs:
 
       - name: Run tests
         run: python servertest/test.py
+
+      - name: Stop Flask server
+        run: kill $(cat flask.pid)
 
       - name: Logout from Docker Hub
         run: docker logout
